@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+const nlp = require('compromise');
 const db = require("../models");
 const Column = db.column;
 const Task = db.task;
@@ -195,13 +196,27 @@ exports.updateTask = (req, res) => {
         if(req.body.update.assigneesIds) {
           task.assignees = Array.from(new Set([...req.body.update.assigneesIds]))
         }
-        if(req.body.update.description) {
-          task.description = req.body.update.description;
-        }
+
         if(req.body.update.labels){
           task.skills = req.body.update.labels.map(l => skills.find(s => s.label === l)._id);
         }
-        
+
+        if(req.body.update.description) {
+          task.description = req.body.update.description;
+
+          const tagsList = skills.map(s => s.label);
+          const doc = nlp(task.description);
+
+          const extractedTags = tagsList.filter(tag => tag.split(' ').find(x => doc.match(`${x}`).out('array').length > 0));
+          extractedTags.forEach(element => {
+            const skillToAdd = skills.find(s => s.label === element);
+            
+            if(!task.skills.find(t => t._id.equals(skillToAdd._id)) && !task.skills.find(s => s.equals(skillToAdd._id))) {
+              task.skills = [...task.skills, skillToAdd];  
+            }
+          });
+        }
+              
         task.save((err, _) => {
           if (err) {
             res.status(500).send({ message: err });
