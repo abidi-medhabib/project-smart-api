@@ -4,6 +4,7 @@ const Task = mongoose.model(
   "Task",
   new mongoose.Schema({
     name: String,
+    description: String,
     assignees: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
@@ -15,6 +16,10 @@ const Task = mongoose.model(
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment"
+      }],
+    skills: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Skill"
       }],
   })
 );

@@ -14,4 +14,20 @@ module.exports = function(app) {
       controller.addTask
     );
 
+  app.post(
+      "/api/board/tasks/move",
+      [authJwt.verifyToken],
+      controller.moveTask
+    );
+  app.post(
+      "/api/board/tasks/comment",
+      [authJwt.verifyToken],
+      controller.addComment
+    );
+
+  app.put(
+      "/api/board/tasks",
+      [authJwt.verifyToken],
+      controller.updateTask
+    );
 }

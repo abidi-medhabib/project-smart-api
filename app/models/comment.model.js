@@ -8,6 +8,7 @@ const Comment = mongoose.model(
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
       },
+    createdAt: Date
   })
 );
 
