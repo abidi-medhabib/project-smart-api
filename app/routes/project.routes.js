@@ -10,13 +10,23 @@ module.exports = function(app) {
     next();
   });
 
+  app.get(
+    "/api/projects/:projectId",
+    [authJwt.verifyToken],
+    controller.getProject
+  );
+
+  app.delete(
+    "/api/projects/:projectId",
+    [authJwt.verifyToken],
+    controller.deleteProject
+  );
 
   app.get(
     "/api/projects",
     [authJwt.verifyToken],
     controller.getProjects
   );
-
   
   app.post(
     "/api/projects",
