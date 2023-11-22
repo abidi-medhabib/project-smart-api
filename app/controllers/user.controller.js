@@ -20,59 +20,95 @@ exports.allAccess = (req, res) => {
   };
 
   exports.addUser = (req, res) => {
-    const user = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 8)
-    });
-  
-    user.save((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
-  
-      if (req.body.role) {
-        Role.findOne(
-          {
-            name: req.body.role
-          },
-          (err, role) => {
+    if(req.body._id) {
+      User.findOne({ _id: req.body._id})
+          .exec((err, userToEdit) => {
             if (err) {
               res.status(500).send({ message: err });
               return;
             }
-  
+
+            userToEdit.name = req.body.name;
+            userToEdit.email = req.body.email;
+
+            Role.findOne(
+              {
+                name: req.body.role
+              },
+              (err, role) => {
+                if (err) {
+                  res.status(500).send({ message: err });
+                  return;
+                }
+      
+                userToEdit.role = role._id;
+                userToEdit.save(err => {
+                  if (err) {
+                    res.status(500).send({ message: err });
+                    return;
+                  }
+      
+                  res.send({ message: "User was registered successfully!" });
+                });
+              }
+            );
+
+          });
+    } else {
+      const user = new User({
+        name: req.body.name,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, 8)
+      });
+    
+      user.save((err, user) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+    
+        if (req.body.role) {
+          Role.findOne(
+            {
+              name: req.body.role
+            },
+            (err, role) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
+              }
+    
+              user.role = role._id;
+              user.save(err => {
+                if (err) {
+                  res.status(500).send({ message: err });
+                  return;
+                }
+    
+                res.send({ message: "User was registered successfully!" });
+              });
+            }
+          );
+        } else {
+          Role.findOne({ name: "Developper" }, (err, role) => {
+            if (err) {
+              res.status(500).send({ message: err });
+              return;
+            }
+    
             user.role = role._id;
             user.save(err => {
               if (err) {
                 res.status(500).send({ message: err });
                 return;
               }
-  
+    
               res.send({ message: "User was registered successfully!" });
             });
-          }
-        );
-      } else {
-        Role.findOne({ name: "Developper" }, (err, role) => {
-          if (err) {
-            res.status(500).send({ message: err });
-            return;
-          }
-  
-          user.role = role._id;
-          user.save(err => {
-            if (err) {
-              res.status(500).send({ message: err });
-              return;
-            }
-  
-            res.send({ message: "User was registered successfully!" });
           });
-        });
-      }
-    });
+        }
+      });
+    }
   };
 
   exports.getUsers = (req, res) => {
@@ -87,7 +123,19 @@ exports.allAccess = (req, res) => {
         _id: u._id,
         name: u.name,
         email: u.email,
-        role: u.role.name
+        role: u.role.name,
+        password: u.password
       })) });
+    });
+  }
+
+  exports.deleteUser = (req, res) => {
+    User.deleteOne({ _id : req.params.userId}, (err, user) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+
+      res.status(200).send();
     });
   }

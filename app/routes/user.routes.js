@@ -37,4 +37,10 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isPM],
     controller.getUsers
   );
+
+  app.delete(
+    "/api/users/:userId",
+    [authJwt.verifyToken],
+    controller.deleteUser
+  );
 };
